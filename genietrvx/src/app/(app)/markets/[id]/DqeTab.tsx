@@ -7,6 +7,7 @@ import { useApp } from "@/components/providers/AppProvider";
 import { useCollection } from "@/lib/client/api";
 import { computeDqeTotals, type DqeItem } from "@/lib/calc/market";
 import { newId, parsePastedItems } from "@/lib/calc/paste";
+import { DqeFileButton } from "@/components/DqeImport";
 import { round2 } from "@/lib/calc/money";
 import type { Market } from "@/lib/schemas";
 
@@ -53,6 +54,13 @@ export function DqeTab({ market }: { market: Market }) {
       actions={
         writable && (
           <>
+            <DqeFileButton
+              onItems={(list) => {
+                setItems((prev) => [...prev, ...list]);
+                setDirty(true);
+                toast(t(list.length ? "markets.importDone" : "markets.importNone", { count: list.length }), list.length ? "info" : "error");
+              }}
+            />
             <Button size="sm" variant="secondary" icon={<ClipboardPaste className="size-4" />} onClick={() => setPaste("")}>
               {t("markets.importItems")}
             </Button>

@@ -1,4 +1,5 @@
 import type { DqeItem } from "./market";
+import { rowsToDqeItems } from "./dqe-import";
 
 export const newId = () =>
   typeof crypto !== "undefined" && "randomUUID" in crypto ? crypto.randomUUID() : `${Date.now()}-${Math.random().toString(36).slice(2)}`;
@@ -9,22 +10,7 @@ export function parseNumber(s: string | undefined): number {
   return Number.isFinite(v) ? v : 0;
 }
 
-/** Lit des lignes collées depuis Excel : Code ⇥ Désignation ⇥ Unité ⇥ Quantité ⇥ PU (le code est facultatif). */
+/** Lit des lignes collées depuis Excel (colonnes séparées par des tabulations), avec ou sans en-tête. */
 export function parsePastedItems(text: string): DqeItem[] {
-  return text
-    .split(/\r?\n/)
-    .map((line) => line.split("\t"))
-    .filter((cols) => cols.some((c) => c.trim()))
-    .map((cols) => {
-      const [code, designation, unit, qty, pu] = cols.length >= 5 ? cols : ["", ...cols];
-      return {
-        id: newId(),
-        code: code?.trim() ?? "",
-        designation: designation?.trim() ?? "",
-        unit: unit?.trim() ?? "",
-        quantity: parseNumber(qty),
-        unitPrice: parseNumber(pu),
-      };
-    })
-    .filter((i) => i.designation);
+  return rowsToDqeItems(text.split(/\r?\n/).map((line) => line.split("\t"))).items;
 }

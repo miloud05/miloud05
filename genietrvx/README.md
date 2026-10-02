@@ -13,7 +13,7 @@
 |---|---|---|
 | لوحة القيادة | Tableau de bord | مؤشرات آنية، رقم الأعمال/التحصيل/المصاريف على 12 شهراً، تقدم الورشات، تنبيهات (فواتير متأخرة، كفالات، مخزون، صيانة، تأمين)، سجل النشاط |
 | الورشات | Chantiers | الميزانية والمصاريف، الفريق والآليات، يومية الورشة، **مخطط غانت** تفاعلي وحساب التقدم المرجّح |
-| الصفقات | Marchés | الكشف الكمي والتقديري (لصق من Excel)، **وضعيات الأشغال** (اقتطاع الضمان، استرجاع التسبيق، المراجعة، الغرامات)، الكشوف التفصيلية، أوامر الخدمة، الملاحق، الكفالات، الآجال والغرامات، **مراجعة الأسعار** P = P0 × (a + Σ bᵢ·Iᵢ/I0ᵢ) |
+| الصفقات | Marchés | الكشف الكمي والتقديري (**استيراد ملف Excel .xlsx أو CSV** أو لصق من Excel)، **وضعيات الأشغال** (اقتطاع الضمان، استرجاع التسبيق، المراجعة، الغرامات)، الكشوف التفصيلية، أوامر الخدمة، الملاحق، الكفالات، الآجال والغرامات، **مراجعة الأسعار** P = P0 × (a + Σ bᵢ·Iᵢ/I0ᵢ) |
 | عروض الأسعار والفواتير | Devis & factures | ترقيم تلقائي، TVA، تخفيض، **حقوق الطابع**، التحصيلات، المبلغ بالحروف، تحويل عرض السعر إلى فاتورة |
 | التقدير الذكي | Estimation IA | تكلفة المشروع حسب النوع/المستوى/المساحة/الولاية (الشمال، الهضاب، الجنوب)، توزيع الحصص، كميات المواد، المدة والتعداد، إنشاء عرض سعر بنقرة |
 | اليد العاملة | Personnel, pointage, paie | ملفات العمال، ورقة الحضور اليومية، **حساب الأجور تلقائياً**: IRG (قانون المالية 2022)، CNAS 9٪ / 26٪، CACOBATPH، الساعات الإضافية، منح القفة والنقل |
@@ -97,8 +97,8 @@ npm run check        # TypeScript + ESLint + tests unitaires (Vitest)
 npm run build && npm run test:e2e   # tests de bout en bout (Playwright)
 ```
 
-- **59 tests unitaires** : IRG/CNAS, bulletins, situations, pénalités, révision des prix, TVA/timbre, montants en lettres, estimation, stock, i18n, base de données, données de démonstration.
-- **15 scénarios E2E** : connexion, toutes les pages, CRUD, Gantt, situation + PDF, devis → facture → encaissement, pointage → paie, contrôle de stock, estimation, arabe RTL, 18 documents PDF, droits par rôle, affichage mobile.
+- **66 tests unitaires** : IRG/CNAS, bulletins, situations, pénalités, révision des prix, TVA/timbre, montants en lettres, estimation, stock, i18n, base de données, données de démonstration.
+- **16 scénarios E2E** : connexion, toutes les pages, CRUD, import Excel/CSV d'un marché, Gantt, situation + PDF, devis → facture → encaissement, pointage → paie, contrôle de stock, estimation, arabe RTL, 18 documents PDF, droits par rôle, affichage mobile.
 
 ## البنية التقنية / Architecture
 

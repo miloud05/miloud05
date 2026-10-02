@@ -1,4 +1,5 @@
 import { expect, test, type Page } from "@playwright/test";
+import { strToU8, zipSync } from "fflate";
 
 const PASSWORD = "Demo@2026";
 
@@ -111,6 +112,40 @@ test.describe("parcours métier", () => {
     await page.getByRole("button", { name: "Enregistrer" }).click();
     await expect(page.getByText("Veuillez corriger les champs signalés.")).toBeVisible();
     await expect(page.getByRole("dialog").getByText("Champ obligatoire")).toBeVisible();
+  });
+
+  test("importe un marché depuis un fichier Excel et complète le DQE par un CSV", async ({ page }) => {
+    const sheet = `<?xml version="1.0" encoding="UTF-8"?><worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main"><sheetData>
+<row r="1"><c r="A1" t="inlineStr"><is><t>DQE — Lycée 800 places</t></is></c></row>
+<row r="3"><c r="A3" t="inlineStr"><is><t>N°</t></is></c><c r="B3" t="inlineStr"><is><t>Désignation</t></is></c><c r="C3" t="inlineStr"><is><t>Unité</t></is></c><c r="D3" t="inlineStr"><is><t>Quantité</t></is></c><c r="E3" t="inlineStr"><is><t>Prix unitaire</t></is></c></row>
+<row r="4"><c r="A4" t="inlineStr"><is><t>1.1</t></is></c><c r="B4" t="inlineStr"><is><t>Terrassements généraux</t></is></c><c r="C4" t="inlineStr"><is><t>m3</t></is></c><c r="D4"><v>1500</v></c><c r="E4"><v>700</v></c></row>
+<row r="5"><c r="A5" t="inlineStr"><is><t>1.2</t></is></c><c r="B5" t="inlineStr"><is><t>Béton armé</t></is></c><c r="C5" t="inlineStr"><is><t>m3</t></is></c><c r="D5"><v>400</v></c><c r="E5"><v>28000</v></c></row>
+<row r="6"><c r="B6" t="inlineStr"><is><t>Total</t></is></c><c r="E6"><v>12250000</v></c></row>
+</sheetData></worksheet>`;
+    const xlsx = Buffer.from(zipSync({ "xl/worksheets/sheet1.xml": strToU8(sheet) }));
+
+    await page.goto("/markets");
+    await page.getByRole("button", { name: "Importer (Excel / CSV)" }).click();
+    const dialog = page.getByRole("dialog");
+    await dialog.getByTestId("dqe-file-input").setInputFiles({ name: "DQE lycee.xlsx", mimeType: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", buffer: xlsx });
+    await expect(dialog.getByText(/2 article\(s\) détecté\(s\)/)).toBeVisible();
+    await expect(dialog.locator("#object")).toHaveValue("DQE lycee");
+    await dialog.locator("#object").fill("Réalisation d'un lycée 800 places");
+    await dialog.getByRole("button", { name: "Créer le marché" }).click();
+    await page.waitForURL(/\/markets\/[\w-]+$/);
+    await expect(page.getByRole("heading", { level: 1 })).toContainText("lycée 800 places");
+    await page.getByRole("tab", { name: /DQE/ }).click();
+    await expect(page.locator("input[value='Béton armé']")).toBeVisible();
+
+    await page.getByTestId("dqe-file-input").setInputFiles({
+      name: "complement.csv",
+      mimeType: "text/csv",
+      buffer: Buffer.from("Code;Désignation;Unité;Quantité;PU\n2.1;Étanchéité;m2;900;2 200,00\n"),
+    });
+    await expect(page.getByText("1 article(s) importé(s).")).toBeVisible();
+    await page.getByRole("button", { name: "Enregistrer" }).click();
+    await expect(page.getByText("Modifications enregistrées.")).toBeVisible();
+    await expect(page.locator("input[value='Étanchéité']")).toBeVisible();
   });
 
   test("ajoute une tâche au planning Gantt d'un chantier", async ({ page }) => {

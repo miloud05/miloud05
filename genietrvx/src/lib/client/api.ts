@@ -205,3 +205,18 @@ export function useApi<T>(url: string | null) {
 
   return { data: snap.data as unknown as T | undefined, loading: url ? snap.loading : false, error: snap.error, reload: load };
 }
+
+/** Envoie un tableur au serveur et récupère les articles de DQE détectés. */
+export async function uploadSpreadsheet(file: File): Promise<{ items: import("@/lib/calc/market").DqeItem[]; fileName: string }> {
+  const form = new FormData();
+  form.append("file", file);
+  let res: Response;
+  try {
+    res = await fetch("/api/import/spreadsheet", { method: "POST", body: form, credentials: "same-origin" });
+  } catch {
+    throw new ApiClientError(0, "network");
+  }
+  const data = (await res.json().catch(() => ({}))) as Record<string, unknown>;
+  if (!res.ok) throw new ApiClientError(res.status, String(data.error ?? "server_error"), data.details);
+  return data as unknown as { items: import("@/lib/calc/market").DqeItem[]; fileName: string };
+}
