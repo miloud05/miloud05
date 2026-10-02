@@ -1,0 +1,212 @@
+@import "tailwindcss";
+
+@custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
+
+:root {
+  --bg: #f4f6fa;
+  --surface: #ffffff;
+  --surface-2: #f8fafc;
+  --border: #e3e8ef;
+  --text: #0f172a;
+  --muted: #64748b;
+  --primary: #e8590c;
+  --primary-hover: #c94a06;
+  --primary-soft: #fff1e8;
+  --primary-fg: #ffffff;
+  --navy: #0f2340;
+  --navy-2: #16305a;
+  --success: #15803d;
+  --success-soft: #e8f7ee;
+  --danger: #dc2626;
+  --danger-soft: #fdecec;
+  --warning: #b45309;
+  --warning-soft: #fdf4e3;
+  --info: #2563eb;
+  --info-soft: #e9f0fe;
+  --ring: rgba(232, 89, 12, 0.35);
+  --shadow: 0 1px 2px rgba(15, 23, 42, 0.05), 0 4px 16px rgba(15, 23, 42, 0.04);
+  color-scheme: light;
+}
+
+[data-theme="dark"] {
+  --bg: #0b1220;
+  --surface: #111a2b;
+  --surface-2: #162236;
+  --border: #233149;
+  --text: #e6ebf3;
+  --muted: #8d9ab0;
+  --primary: #fb7a2e;
+  --primary-hover: #ff9152;
+  --primary-soft: #2a1a10;
+  --primary-fg: #ffffff;
+  --navy: #0a1424;
+  --navy-2: #13213a;
+  --success: #4ade80;
+  --success-soft: #11291c;
+  --danger: #f87171;
+  --danger-soft: #2c1414;
+  --warning: #fbbf24;
+  --warning-soft: #2b2110;
+  --info: #60a5fa;
+  --info-soft: #102039;
+  --ring: rgba(251, 122, 46, 0.4);
+  --shadow: 0 1px 2px rgba(0, 0, 0, 0.3), 0 4px 16px rgba(0, 0, 0, 0.25);
+  color-scheme: dark;
+}
+
+@theme inline {
+  --color-bg: var(--bg);
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
+  --color-border: var(--border);
+  --color-text: var(--text);
+  --color-muted: var(--muted);
+  --color-primary: var(--primary);
+  --color-primary-hover: var(--primary-hover);
+  --color-primary-soft: var(--primary-soft);
+  --color-primary-fg: var(--primary-fg);
+  --color-navy: var(--navy);
+  --color-navy-2: var(--navy-2);
+  --color-success: var(--success);
+  --color-success-soft: var(--success-soft);
+  --color-danger: var(--danger);
+  --color-danger-soft: var(--danger-soft);
+  --color-warning: var(--warning);
+  --color-warning-soft: var(--warning-soft);
+  --color-info: var(--info);
+  --color-info-soft: var(--info-soft);
+  --font-sans: var(--font-inter), var(--font-arabic), system-ui, sans-serif;
+  --font-arabic: var(--font-cairo), system-ui, sans-serif;
+  --shadow-card: var(--shadow);
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-inter), system-ui, sans-serif;
+  font-feature-settings: "tnum" 1;
+}
+
+html[lang="ar"] body {
+  font-family: var(--font-cairo), var(--font-inter), system-ui, sans-serif;
+}
+
+:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+}
+
+::selection {
+  background: var(--primary-soft);
+}
+
+.num {
+  font-variant-numeric: tabular-nums;
+  direction: ltr;
+  unicode-bidi: isolate;
+}
+
+.scrollbar-thin::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+.scrollbar-thin::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 8px;
+}
+
+@keyframes gtx-fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+.animate-in {
+  animation: gtx-fade-in 0.18s ease-out;
+}
+
+@keyframes gtx-pulse {
+  50% {
+    opacity: 0.5;
+  }
+}
+.skeleton {
+  background: var(--surface-2);
+  border-radius: 8px;
+  animation: gtx-pulse 1.4s ease-in-out infinite;
+}
+
+/* ------------------------------------------------------------------ */
+/* Impression (documents PDF)                                          */
+/* ------------------------------------------------------------------ */
+
+.print-page {
+  background: #fff;
+  color: #0f172a;
+  width: 210mm;
+  min-height: 297mm;
+  margin: 0 auto;
+  padding: 14mm 14mm 18mm;
+  box-shadow: 0 2px 24px rgba(15, 23, 42, 0.12);
+  font-size: 11.5px;
+  line-height: 1.45;
+}
+.print-page.landscape {
+  width: 297mm;
+  min-height: 210mm;
+}
+.print-page table {
+  width: 100%;
+  border-collapse: collapse;
+}
+.print-page th,
+.print-page td {
+  border: 1px solid #cbd5e1;
+  padding: 4px 6px;
+  vertical-align: top;
+}
+.print-page th {
+  background: #f1f5f9;
+  font-weight: 600;
+  text-align: start;
+}
+.print-page .no-border td,
+.print-page .no-border th {
+  border: none;
+  padding: 2px 0;
+}
+
+@media print {
+  @page {
+    size: A4;
+    margin: 0;
+  }
+  html,
+  body {
+    background: #fff !important;
+  }
+  .no-print {
+    display: none !important;
+  }
+  .print-page {
+    box-shadow: none;
+    margin: 0;
+    width: auto;
+    min-height: auto;
+  }
+  .print-page th {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+  .print-break {
+    break-before: page;
+  }
+}
