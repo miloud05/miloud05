@@ -1,41 +1,87 @@
 import { describe, expect, it } from "vitest";
 import bcrypt from "bcryptjs";
-import { Store } from "@/lib/server/db";
+import { mkdtempSync, readFileSync } from "node:fs";
+import { tmpdir } from "node:os";
+import path from "node:path";
+import { Store, sqliteAvailable } from "@/lib/server/db";
 import { seedDatabase, DEMO_PASSWORD } from "@/lib/server/seed";
 import { generatePayslips, summarizeAttendance } from "@/lib/server/payroll-service";
 import { COLLECTIONS, schemas, settingsSchema } from "@/lib/schemas";
 import { DEFAULT_PAYROLL_RATES } from "@/lib/calc/payroll";
 
-describe("Store", () => {
+describe.each(["sqlite", "json"] as const)("Store (moteur %s)", (engine) => {
+  const open = () => new Store(":memory:", engine);
+
+  it("utilise le moteur demandé", () => {
+    expect(open().engine).toBe(engine);
+  });
+
   it("insère, lit, met à jour et supprime des documents", () => {
-    const s = new Store(":memory:");
+    const s = open();
     const doc = s.insert("clients", { name: "A" });
     expect(s.get("clients", doc.id)?.name).toBe("A");
     s.update("clients", doc.id, { name: "B" });
     expect(s.get("clients", doc.id)?.name).toBe("B");
     expect(s.list("clients")).toHaveLength(1);
+    expect(s.count("clients")).toBe(1);
     expect(s.remove("clients", doc.id)).toBe(true);
     expect(s.list("clients")).toHaveLength(0);
   });
 
+  it("liste du plus récent au plus ancien", () => {
+    const s = open();
+    s.insert("clients", { name: "1" });
+    s.insert("clients", { name: "2" });
+    s.insert("clients", { name: "3" });
+    expect(s.list<{ name: string }>("clients").map((c) => c.name)).toEqual(["3", "2", "1"]);
+  });
+
   it("annule une transaction en cas d'erreur", () => {
-    const s = new Store(":memory:");
+    const s = open();
+    s.insert("clients", { name: "garde" });
     expect(() =>
       s.transaction(() => {
         s.insert("clients", { name: "X" });
+        s.transaction(() => s.insert("clients", { name: "Y" }));
         throw new Error("boom");
       }),
     ).toThrow("boom");
-    expect(s.count("clients")).toBe(0);
+    expect(s.list<{ name: string }>("clients").map((c) => c.name)).toEqual(["garde"]);
   });
 
   it("sauvegarde et restaure toutes les données", () => {
-    const s = new Store(":memory:");
+    const s = open();
     s.insert("clients", { name: "A" });
     const dump = s.dump();
     s.clear();
+    expect(s.count("clients")).toBe(0);
     s.restore(dump);
-    expect(s.list("clients")[0].name).toBe("A");
+    expect(s.list<{ name: string }>("clients")[0].name).toBe("A");
+  });
+
+  it("conserve les données sur disque après redémarrage", () => {
+    const dir = mkdtempSync(path.join(tmpdir(), "gtx-"));
+    const file = path.join(dir, "genietrvx.db");
+    const a = new Store(file, engine);
+    const doc = a.insert("clients", { name: "Persistant" });
+    a.close();
+    const b = new Store(file, engine);
+    expect(b.get<{ name: string }>("clients", doc.id)?.name).toBe("Persistant");
+    b.close();
+  });
+});
+
+describe("Store (sélection automatique)", () => {
+  it("choisit SQLite si disponible, sinon le stockage JSON", () => {
+    expect(new Store(":memory:").engine).toBe(sqliteAvailable() ? "sqlite" : "json");
+  });
+
+  it("écrit un fichier JSON lisible pour le moteur de secours", () => {
+    const dir = mkdtempSync(path.join(tmpdir(), "gtx-"));
+    const s = new Store(path.join(dir, "genietrvx.db"), "json");
+    s.insert("clients", { name: "Fichier" });
+    const json = JSON.parse(readFileSync(path.join(dir, "genietrvx.json"), "utf8"));
+    expect(json.records[0].data.name).toBe("Fichier");
   });
 });
 

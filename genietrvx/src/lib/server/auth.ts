@@ -4,6 +4,7 @@ import { randomBytes } from "node:crypto";
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import path from "node:path";
 import { getStore } from "./store";
+import { dataDirectory } from "./db";
 import type { Role } from "@/lib/permissions";
 
 export const SESSION_COOKIE = "gtx_session";
@@ -23,7 +24,7 @@ function secretKey(): Uint8Array {
   if (cachedKey) return cachedKey;
   let secret = process.env.AUTH_SECRET;
   if (!secret || secret.length < 32) {
-    const dir = path.dirname(process.env.DATABASE_PATH || path.join(process.cwd(), "data", "genietrvx.db"));
+    const dir = dataDirectory();
     const file = path.join(dir, ".auth-secret");
     if (existsSync(file)) {
       secret = readFileSync(file, "utf8").trim();

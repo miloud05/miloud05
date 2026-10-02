@@ -40,7 +40,7 @@
 
 ## التشغيل السريع / Démarrage rapide
 
-المتطلبات: **Node.js 22.13 أو أحدث** (يستعمل قاعدة SQLite المدمجة في Node، بدون أي خادم قاعدة بيانات).
+المتطلبات: **Node.js 20.9 أو أحدث** — بدون أي خادم قاعدة بيانات. مع Node 22.13+ تُستعمل قاعدة SQLite المدمجة، ومع Node 20 تُحفظ البيانات تلقائياً في ملف `data/genietrvx.json`.
 
 ```bash
 cd genietrvx
@@ -94,14 +94,14 @@ npm run check        # TypeScript + ESLint + tests unitaires (Vitest)
 npm run build && npm run test:e2e   # tests de bout en bout (Playwright)
 ```
 
-- **38 tests unitaires** : IRG/CNAS, bulletins, situations, pénalités, révision des prix, TVA/timbre, montants en lettres, estimation, stock, i18n, base de données, données de démonstration.
+- **49 tests unitaires** : IRG/CNAS, bulletins, situations, pénalités, révision des prix, TVA/timbre, montants en lettres, estimation, stock, i18n, base de données, données de démonstration.
 - **15 scénarios E2E** : connexion, toutes les pages, CRUD, Gantt, situation + PDF, devis → facture → encaissement, pointage → paie, contrôle de stock, estimation, arabe RTL, 18 documents PDF, droits par rôle, affichage mobile.
 
 ## البنية التقنية / Architecture
 
 - **Next.js 16** (App Router, `proxy.ts`) · **React 19** · **TypeScript** · **Tailwind CSS 4** · **Recharts**
 - API REST (`src/app/api`) validée par **Zod**, sessions JWT (**jose**) en cookie `httpOnly`, mots de passe **bcrypt**, limitation des tentatives de connexion, en-têtes de sécurité
-- Stockage documentaire sur **SQLite** natif (`node:sqlite`) avec transactions, intégrité référentielle et journal d'activité
+- Stockage documentaire sur **SQLite** natif (`node:sqlite`, Node ≥ 22.13) ou fichier **JSON** automatique (Node 20), avec transactions, intégrité référentielle et journal d'activité
 - Logique métier pure et testée dans `src/lib/calc` (paie, marchés, documents, estimation, stock)
 
 ```

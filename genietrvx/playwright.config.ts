@@ -17,7 +17,8 @@ export default defineConfig({
   },
   projects: [{ name: "chromium", use: { ...devices["Desktop Chrome"] } }],
   webServer: {
-    command: `rm -rf .e2e && mkdir -p .e2e && DATABASE_PATH=.e2e/e2e.db npx next start -p ${PORT}`,
+    // E2E_NODE permet de tester avec un autre binaire Node (ex. Node 20 → stockage JSON).
+    command: `rm -rf .e2e && mkdir -p .e2e && DATABASE_PATH=.e2e/e2e.db ${process.env.E2E_NODE ?? "node"} node_modules/next/dist/bin/next start -p ${PORT}`,
     url: `http://localhost:${PORT}/login`,
     reuseExistingServer: false,
     timeout: 120_000,

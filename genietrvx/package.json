@@ -39,6 +39,6 @@
   },
   "description": "GenieTRVX — ERP bilingue (FR/AR) de gestion de chantiers BTP pour l'Algérie",
   "engines": {
-    "node": ">=22.13"
+    "node": ">=20.9"
   }
 }
