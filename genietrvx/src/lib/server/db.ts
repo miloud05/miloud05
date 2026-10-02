@@ -268,6 +268,8 @@ let fallbackLogged = false;
 
 export class Store {
   readonly engine: EngineKind;
+  /** Générateur d'identifiants (remplacé pendant l'amorçage pour des données de démo reproductibles). */
+  idFactory: () => string = randomUUID;
   private impl: Engine;
   private depth = 0;
 
@@ -305,7 +307,7 @@ export class Store {
     return this.impl.count(collection);
   }
 
-  insert<T extends Record<string, unknown>>(collection: string, data: T, id: string = randomUUID()): T & BaseRecord {
+  insert<T extends Record<string, unknown>>(collection: string, data: T, id: string = this.idFactory()): T & BaseRecord {
     const now = new Date().toISOString();
     const clean = stripMeta(data);
     this.impl.insert({ collection, id, data: JSON.stringify(clean), created_at: now, updated_at: now });
@@ -387,6 +389,13 @@ function stripMeta<T extends Record<string, unknown>>(data: T): Omit<T, "id" | "
 /* ------------------------------------------------------------------ */
 
 let resolvedDir: string | null = null;
+let temporaryDir = false;
+
+/** Vrai si les données sont stockées dans le dossier temporaire (disque non persistant). */
+export function usingTemporaryStorage(): boolean {
+  dataDirectory();
+  return temporaryDir;
+}
 
 /** Dossier des données ; si le dossier configuré n'est pas inscriptible (hébergeur en lecture seule), dossier temporaire. */
 export function dataDirectory(): string {
@@ -398,6 +407,7 @@ export function dataDirectory(): string {
     resolvedDir = configured;
   } catch {
     resolvedDir = path.join(os.tmpdir(), "genietrvx");
+    temporaryDir = true;
     mkdirSync(resolvedDir, { recursive: true });
     console.warn(`[genietrvx] ${configured} n'est pas accessible en écriture : données stockées dans ${resolvedDir}.`);
   }

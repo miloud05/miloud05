@@ -12,6 +12,7 @@ import {
   signSession,
 } from "@/lib/server/auth";
 import { logActivity } from "@/lib/server/collections";
+import { isHttps, sessionCookieOptions } from "@/lib/server/session";
 import type { Role } from "@/lib/permissions";
 
 const bodySchema = z.object({
@@ -42,13 +43,6 @@ export const POST = handler(async (req: NextRequest) => {
   logActivity(store, session, "login", "users", { name: user.name });
 
   const res = NextResponse.json({ user: session });
-  const secure = req.nextUrl.protocol === "https:" || req.headers.get("x-forwarded-proto") === "https";
-  res.cookies.set(SESSION_COOKIE, token, {
-    httpOnly: true,
-    sameSite: "lax",
-    secure,
-    path: "/",
-    maxAge: sessionMaxAge,
-  });
+  res.cookies.set(SESSION_COOKIE, token, sessionCookieOptions(isHttps(req), sessionMaxAge));
   return res;
 });

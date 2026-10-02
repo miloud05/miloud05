@@ -1,3 +1,4 @@
+import { randomUUID } from "node:crypto";
 import { Store, databasePath } from "./db";
 import { seedDatabase } from "./seed";
 import { settingsSchema, type Settings } from "@/lib/schemas";
@@ -23,4 +24,13 @@ export function saveSettings(input: unknown, store: Store = getStore()): Setting
   const parsed = settingsSchema.parse(input);
   store.upsert("settings", "main", parsed as unknown as Record<string, unknown>);
   return parsed;
+}
+
+/** Identifiant aléatoire propre à cette base (distingue un compte supprimé d'un jeton émis ailleurs). */
+export function storeInstanceId(store: Store = getStore()): string {
+  const meta = store.get<{ value?: string }>("meta", "instance");
+  if (meta?.value) return meta.value;
+  const value = randomUUID();
+  store.upsert("meta", "instance", { value });
+  return value;
 }

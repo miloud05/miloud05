@@ -84,6 +84,9 @@ docker run -d -p 3000:3000 -v genietrvx-data:/app/data \
 | `AUTH_SECRET` | généré dans `data/.auth-secret` | Clé de signature des sessions (≥ 32 caractères) |
 | `ADMIN_EMAIL` / `ADMIN_PASSWORD` | `admin@genietrvx.dz` / `Demo@2026` | Compte créé au premier démarrage |
 | `GENIETRVX_DEMO` | `true` | `false` = base vide sans données de démonstration |
+| `ALLOW_IFRAME` | `false` | `true` (au moment du build) = autoriser l'affichage dans une iframe en production |
+
+> ⚠️ **الاستضافة:** المنصة تحتاج خادماً بقرص دائم (VPS، Docker، Render/Railway مع Volume). على منصات «بدون خادم» مثل Vercel أو Netlify يعمل تسجيل الدخول والتصفح، لكن البيانات الجديدة لا تُحفظ بشكل دائم لأن كل نسخة لها قرص مؤقت خاص بها. عرّف دائماً `AUTH_SECRET` في الإنتاج.
 
 ---
 
@@ -94,7 +97,7 @@ npm run check        # TypeScript + ESLint + tests unitaires (Vitest)
 npm run build && npm run test:e2e   # tests de bout en bout (Playwright)
 ```
 
-- **49 tests unitaires** : IRG/CNAS, bulletins, situations, pénalités, révision des prix, TVA/timbre, montants en lettres, estimation, stock, i18n, base de données, données de démonstration.
+- **59 tests unitaires** : IRG/CNAS, bulletins, situations, pénalités, révision des prix, TVA/timbre, montants en lettres, estimation, stock, i18n, base de données, données de démonstration.
 - **15 scénarios E2E** : connexion, toutes les pages, CRUD, Gantt, situation + PDF, devis → facture → encaissement, pointage → paie, contrôle de stock, estimation, arabe RTL, 18 documents PDF, droits par rôle, affichage mobile.
 
 ## البنية التقنية / Architecture

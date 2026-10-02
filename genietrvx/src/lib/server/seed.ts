@@ -15,9 +15,27 @@ function rng(seed: number) {
   };
 }
 
+/** Identifiants au format UUID, identiques à chaque amorçage (instances multiples cohérentes). */
+function deterministicIds(seed: number) {
+  const next = rng(seed);
+  const hex = (n: number) =>
+    Array.from({ length: n }, () => Math.floor(next() * 16).toString(16)).join("");
+  return () => `${hex(8)}-${hex(4)}-4${hex(3)}-a${hex(3)}-${hex(12)}`;
+}
+
 export function seedDatabase(store: Store, { demo }: { demo: boolean }) {
   if (store.count("users") > 0) return;
 
+  const previousFactory = store.idFactory;
+  store.idFactory = deterministicIds(46_2026);
+  try {
+    seedAll(store, demo);
+  } finally {
+    store.idFactory = previousFactory;
+  }
+}
+
+function seedAll(store: Store, demo: boolean) {
   store.transaction(() => {
     const adminEmail = (process.env.ADMIN_EMAIL || "admin@genietrvx.dz").toLowerCase();
     const adminPassword = process.env.ADMIN_PASSWORD || DEMO_PASSWORD;
