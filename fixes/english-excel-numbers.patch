@@ -1,0 +1,42 @@
+diff --git a/src/lib/calc/paste.ts b/src/lib/calc/paste.ts
+--- a/src/lib/calc/paste.ts
++++ b/src/lib/calc/paste.ts
+@@ -5,7 +5,12 @@
+
+ /** Convertit un nombre saisi à la française (« 1 250,50 ») ou à l'anglaise. */
+ export function parseNumber(s: string | undefined): number {
+-  const v = Number(String(s ?? "").replace(/[\s\u00a0\u202f]/g, "").replace(",", "."));
++  const compact = String(s ?? "").replace(/[\s\u00a0\u202f]/g, "");
++  // Le point décimal distingue les milliers anglais de la virgule décimale française.
++  const normalized = /^[+-]?\d{1,3}(?:,\d{3})+\.\d+$/.test(compact)
++    ? compact.replace(/,/g, "")
++    : compact.replace(",", ".");
++  const v = Number(normalized);
+   return Number.isFinite(v) ? v : 0;
+ }
+
+diff --git a/tests/unit/paste.test.ts b/tests/unit/paste.test.ts
+--- a/tests/unit/paste.test.ts
++++ b/tests/unit/paste.test.ts
+@@ -10,6 +10,21 @@
+     expect(items[0].id).not.toBe(items[1].id);
+   });
+
++  it("importe les nombres anglais avec séparateurs de milliers sans perdre leur valeur", () => {
++    const [item] = parsePastedItems("1.1\tBéton\tm3\t1,200.50\t6,500.25");
++    expect(item).toMatchObject({ quantity: 1200.5, unitPrice: 6500.25 });
++  });
++
++  it.each([
++    ["1,234.56", 1234.56],
++    ["1,234,567.89", 1234567.89],
++    ["-1,234.56", -1234.56],
++    ["1,234", 1.234],
++    ["12,34.56", 0],
++  ])("convertit %s en %s", (input, expected) => {
++    expect(parseNumber(input)).toBe(expected);
++  });
++
+   it("ignore les lignes sans désignation et les nombres invalides", () => {
+     expect(parsePastedItems("\t\t\t\t")).toHaveLength(0);
+     expect(parseNumber("abc")).toBe(0);
